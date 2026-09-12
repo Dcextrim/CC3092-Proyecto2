@@ -1,0 +1,14 @@
+# Entornos y caches
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+
+# Datos locales de PaySim (no versionar archivos grandes)
+data/
+*.zip
+*_log.csv
+
+# Archivos temporales de ejecucion
+tmp_*.py
+*_execute.out
+*_execute.err
