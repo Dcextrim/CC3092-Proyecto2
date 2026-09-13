@@ -1,14 +1,20 @@
-# Entornos y caches
+# Entorno
 .venv/
 __pycache__/
+*.py[cod]
+
+# Datos (se descargan con src/data_pipeline/sourcing/downloaders/descarga.py)
+data/
+
+# Notebooks
 .ipynb_checkpoints/
 
-# Datos locales de PaySim (no versionar archivos grandes)
-data/
-*.zip
-*_log.csv
+# Insumos de referencia, no versionados
+tmp/
 
-# Archivos temporales de ejecucion
-tmp_*.py
-*_execute.out
-*_execute.err
+# Credenciales
+kaggle.json
+.env
+
+# Paquetes de artefactos descargados desde Colab
+artefactos_*.zip

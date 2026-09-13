@@ -1,0 +1,36 @@
+# Deteccion de lavado de dinero en secuencias de remesas
+# Python 3.12
+
+# Manipulación de datos
+pandas>=2.2,<3
+numpy>=1.26,<3
+pyarrow>=16,<22
+
+# Descarga de datos desde Kaggle
+kagglehub>=0.3,<1
+requests>=2.32,<3
+tqdm>=4.66,<5
+
+# Deep learning
+# torch debe instalarse desde el índice CPU para desarrollo local; el wheel de PyPI
+# incluye CUDA y pesa varias veces mas. En Colab ya viene preinstalado con GPU:
+#   uv pip install torch --index-url https://download.pytorch.org/whl/cpu
+torch>=2.4,<3
+
+# Exportación del modelo para el MVP
+onnx>=1.16,<2
+onnxruntime>=1.18,<2
+
+# Métricas, particiones y calibración
+scikit-learn>=1.5,<2
+
+# Visualización
+matplotlib>=3.9,<4
+seaborn>=0.13,<0.15
+
+# Notebooks
+ipykernel>=6.29,<7
+jupyter>=1.1,<2
+
+# Configuración
+pyyaml>=6,<7

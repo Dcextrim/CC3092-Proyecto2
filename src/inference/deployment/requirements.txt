@@ -1,0 +1,8 @@
+# Dependencias del MVP desplegado en Render.
+# No incluye torch. La inferencia corre sobre onnxruntime, que
+# consume una fraccion de la memoria del plan gratuito.
+streamlit>=1.49,<2
+onnxruntime>=1.18,<2
+numpy>=1.26,<3
+pandas>=2.2,<3
+plotly>=5.24,<7
