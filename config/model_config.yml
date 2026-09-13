@@ -1,0 +1,85 @@
+# Parámetros del sistema de detección. Cada valor lleva la razón por la que se eligió.
+# Las cifras citadas provienen de la exploración de HI-Small_Trans.csv (5,078,345
+# transacciones, 496,999 emisores, 3,376 emisores con al menos una transacción de lavado).
+
+datos:
+  archivo: HI-Small_Trans.csv
+  # El identificador hexadecimal de cuenta se repite entre bancos, así que el
+  # remitente solo queda univocamente definido por el par banco más cuenta.
+  clave_emisor: [From Bank, Account]
+
+secuencias:
+  # Mínimo de transacciones salientes para conservar a un remitente.
+  # Con 3 quedan 185,993 emisores y 2,758 positivos, pero la secuencia es demasiado
+  # corta para que una red recurrente aprenda algo del orden temporal.
+  # Con 5 quedan 128,779 emisores y solo 1,626 positivos.
+  # Con 4 quedan 142,306 emisores y 2,085 positivos, con la prevalencia mas alta (1.47%).
+  minimo_transacciones: 4
+  # Longitud máxima. La mediana de longitud es 21 y el percentil 95 es 81.
+  # Con 32 se conserva el historial completo del 70.5% de los emisores y del 80% de
+  # los emisores positivos, a un tercio del costo de computo que exigiría usar 81.
+  longitud_maxima: 32
+  # Se conservan las últimas transacciones porque el comportamiento reciente es el
+  # que un equipo de cumplimiento revisa al abrir una alerta.
+  recorte: ultimas
+
+particion:
+  # Por emisor, nunca por transaccion: una secuencia entera cae en un solo conjunto.
+  entrenamiento: 0.70
+  validacion: 0.15
+  prueba: 0.15
+  estratificar: true
+  semilla: 42
+
+entrenamiento:
+  semillas: [0, 1, 2]
+  # Fracciones del conjunto etiquetado con las que se mide si la transferencia
+  # rinde cuando hay pocos ejemplos positivos. El punto de 100% viene de la
+  # tabla de ablacion principal.
+  fracciones_de_escasez: [0.10, 0.25, 0.50]
+  semillas_de_escasez: [0, 1]
+  batch: 512
+  # Presupuesto de alertas que puede revisar un equipo de cumplimiento, expresado
+  # como fraccion de los remitentes evaluados. Define el umbral operativo.
+  presupuesto_alertas: 0.01
+
+etapa_a:
+  dimension_oculta: 64
+  dimension_latente: 128
+  # Con 80 epocas la perdida de validacion seguia bajando al llegar al tope, con
+  # una pendiente de 0.00027 por epoca y una mejora del 9.4% entre las epocas 60
+  # y 79. Un codificador sin converger seria una inicializacion injusta para la
+  # comparacion contra la linea base, asi que el tope se eleva lo suficiente
+  # para que sea la parada temprana la que decida el final.
+  epocas_maximas: 300
+  paciencia: 15
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  recorte_gradiente: 1.0
+
+etapa_b:
+  epocas_maximas: 25
+  paciencia: 5
+  learning_rate_codificador: 0.0001
+  learning_rate_cabeza: 0.001
+  weight_decay: 0.0001
+  recorte_gradiente: 1.0
+  focal_gamma: 2.0
+  # Peso de la clase positiva dentro de la perdida focal. Con el submuestreo de
+  # 20 a 1 la prevalencia de entrenamiento queda en 4.8%, asi que un alpha de
+  # 0.75 sigue favoreciendo a los positivos sin llegar a ignorar a los normales.
+  focal_alpha: 0.75
+  # Submuestreo de negativos solo en entrenamiento. La evaluación siempre ocurre
+  # sobre la distribución natural.
+  razon_negativos: 20
+  # Negativos que se conservan al vigilar el PR-AUC entre epocas. Con cero se usa
+  # la validación completa, que es lo correcto y lo que la GPU permite. El
+  # submuestreo solo existia para abaratar el seguimiento en CPU.
+  negativos_de_seguimiento: 0
+
+umbral_estructuracion:
+  # Umbral de reporte de transacciones en efectivo en dólares. Sujeto a validación
+  # normativa antes de usarse en un entorno real.
+  monto_usd: 10000
+  # Banda inferior a partir de la cual se considera fraccionamiento.
+  fraccion_inferior: 0.75
