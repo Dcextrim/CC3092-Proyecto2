@@ -1,0 +1,17 @@
+# Despliegue del MVP en Render.
+services:
+  - type: web
+    name: remittance-aml
+    runtime: python
+    plan: free
+    region: oregon
+    buildCommand: pip install -r src/inference/deployment/requirements.txt
+    startCommand: >-
+      streamlit run src/inference/deployment/app.py
+      --server.port $PORT
+      --server.address 0.0.0.0
+      --server.headless true
+      --browser.gatherUsageStats false
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
