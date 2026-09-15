@@ -1,0 +1,59 @@
+{
+  "variables": [
+    "log_monto",
+    "log_delta_t",
+    "hora_sin",
+    "hora_cos",
+    "dia_sin",
+    "dia_cos",
+    "formato_ach",
+    "formato_bitcoin",
+    "formato_cash",
+    "formato_cheque",
+    "formato_credit_card",
+    "formato_reinvestment",
+    "formato_wire",
+    "cruce_banco",
+    "cruce_moneda",
+    "auto_transferencia",
+    "destino_nuevo",
+    "log_repeticiones_destino",
+    "desvio_monto",
+    "cerca_umbral"
+  ],
+  "catalogos": {
+    "monedas": [
+      "US Dollar",
+      "Bitcoin",
+      "Euro",
+      "Australian Dollar",
+      "Yuan",
+      "Rupee",
+      "Yen",
+      "Mexican Peso",
+      "UK Pound",
+      "Ruble",
+      "Canadian Dollar",
+      "Swiss Franc",
+      "Brazil Real",
+      "Saudi Riyal",
+      "Shekel"
+    ],
+    "formatos": [
+      "Reinvestment",
+      "Cheque",
+      "Credit Card",
+      "ACH",
+      "Cash",
+      "Wire",
+      "Bitcoin"
+    ]
+  },
+  "umbrales": {
+    "alerta": 0.9664792184679317,
+    "anomalia": 0.12215499579906464,
+    "presupuesto": 0.01
+  },
+  "remitentes": 1000,
+  "positivos": 292
+}
