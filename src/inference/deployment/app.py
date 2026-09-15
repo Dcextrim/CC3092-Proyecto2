@@ -35,6 +35,11 @@ MODELO = RAIZ / "results" / "models" / "sistema.onnx"
 COLOR_ALERTA = "#C44E52"
 COLOR_NORMAL = "#4C72B0"
 
+COLUMNAS_TABLA = [
+    "transaccion", "fecha", "monto_usd", "formato", "moneda", "destino",
+    "destino_nuevo", "cruce_moneda", "cerca_umbral", "contribucion", "es_lavado",
+]
+
 
 @st.cache_resource(show_spinner=False)
 def cargar_sesion() -> onnxruntime.InferenceSession:
@@ -98,7 +103,7 @@ def mapa_de_calor(pesos: pd.DataFrame) -> go.Figure:
 
 def main() -> None:
     """Arma la página completa."""
-    st.set_page_config(page_title="Deteccion de Lavado en Remesas", layout="wide")
+    st.set_page_config(page_title="Detección de Lavado en Remesas", layout="wide")
 
     if not MODELO.exists():
         st.error(
@@ -207,7 +212,7 @@ def main() -> None:
         width="stretch",
     )
 
-    st.subheader("Que transacciones activaron la alerta")
+    st.subheader("¿Qué transacciones activaron la alerta?")
     st.plotly_chart(mapa_de_calor(pesos), width="stretch")
 
     st.subheader("Explicación")
@@ -216,14 +221,28 @@ def main() -> None:
     st.subheader("Secuencia de transacciones")
     tabla = vista.join(pesos.set_index("paso")[["contribucion"]], on="paso")
     tabla["transaccion"] = tabla["paso"] + 1
-    columnas = ["transaccion", "fecha", "monto_usd", "formato", "moneda", "destino",
-                "destino_nuevo", "cruce_moneda", "cerca_umbral", "contribucion", "es_lavado"]
+    for indicador in ("destino_nuevo", "cruce_moneda", "cerca_umbral", "es_lavado"):
+        tabla[indicador] = tabla[indicador].astype(bool)
+
     st.dataframe(
-        tabla[columnas].style
-        .format({"monto_usd": "{:,.2f}", "contribucion": "{:.2f}",
-                 "fecha": lambda f: f.strftime("%d/%m %H:%M")})
-        .background_gradient(subset=["contribucion"], cmap="Reds", vmin=0, vmax=1),
-        width="stretch", hide_index=True,
+        tabla[COLUMNAS_TABLA],
+        width="stretch",
+        hide_index=True,
+        column_config={
+            "transaccion": st.column_config.NumberColumn("N", width="small"),
+            "fecha": st.column_config.DatetimeColumn("Fecha", format="DD/MM/YYYY HH:mm"),
+            "monto_usd": st.column_config.NumberColumn("Monto USD", format="$%.2f"),
+            "formato": st.column_config.TextColumn("Formato"),
+            "moneda": st.column_config.TextColumn("Moneda"),
+            "destino": st.column_config.TextColumn("Destino"),
+            "destino_nuevo": st.column_config.CheckboxColumn("Destino nuevo"),
+            "cruce_moneda": st.column_config.CheckboxColumn("Cambio de moneda"),
+            "cerca_umbral": st.column_config.CheckboxColumn("Bajo umbral"),
+            "contribucion": st.column_config.ProgressColumn(
+                "Contribucion", min_value=0.0, max_value=1.0, format="%.2f"
+            ),
+            "es_lavado": st.column_config.CheckboxColumn("Lavado (etiqueta)"),
+        },
     )
     st.caption(
         "La columna `contribucion` combina el peso de atención de la etapa B con el error "
